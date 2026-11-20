@@ -88,8 +88,8 @@
     background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(14,10,18,.45) 100%);
   }
 
-  /* ============ The marquee sign, under the footer ============ */
-  .sign-foot { display: flex; justify-content: center; padding: .5rem 16px 3.5rem; }
+  /* ============ The marquee sign, just under the photo ============ */
+  .sign-top { display: flex; justify-content: center; padding: clamp(1.75rem, 5vw, 2.75rem) 16px 0; }
   .frame {
     width: min(500px, 84vw); padding: 16px; border-radius: 10px;
     background-color: rgba(40, 33, 46, .5);
@@ -338,6 +338,15 @@
   <p class="vh" id="ticker-label"></p>
   <div class="ticker-track" id="ticker-track" aria-hidden="true"></div>
 </div>
+<div class="sign-top">
+  <div class="frame">
+    <div class="board" id="board" role="img" aria-label="Adtech at CES 2027. January 6 to 9, Las Vegas.">
+      <span class="line l1">ADTECH AT CES</span>
+      <span class="line l2">2027</span>
+      <span class="line l3">JAN 6–9 LAS VEGAS</span>
+    </div>
+  </div>
+</div>
 
 <main class="wrap">
 
@@ -465,15 +474,6 @@
   </footer>
 </main>
 
-<div class="sign-foot">
-  <div class="frame">
-    <div class="board" id="board" role="img" aria-label="Adtech at CES 2027. January 6 to 9, Las Vegas.">
-      <span class="line l1">ADTECH AT CES</span>
-      <span class="line l2">2027</span>
-      <span class="line l3">JAN 6–9 LAS VEGAS</span>
-    </div>
-  </div>
-</div>
 
 <script>
 /* ================================================================

@@ -9,7 +9,7 @@
 <meta property="og:url" content="https://adtechatces.github.io/">
 <meta property="og:title" content="Adtech at CES 2027: the ad tech event list">
 <meta property="og:description" content="Parties, happy hours, breakfasts, summits and suites around CES week in Las Vegas. Free, updated daily.">
-<meta property="og:image" content="https://adtechatces.github.io/og.png">
+<meta property="og:image" content="https://adtechatces.github.io/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -74,16 +74,36 @@
   .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ---------- Marquee letterboard ---------- */
-  .marquee-band { background: var(--night); padding: clamp(1.5rem, 5vw, 3.5rem) 16px; }
+  .marquee-band {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: var(--night);
+    padding: clamp(3.25rem, 11vw, 8.5rem) 16px clamp(2.5rem, 7vw, 5.5rem);
+  }
+  .marquee-band::before {
+    content: ""; position: absolute; inset: 0; z-index: -2;
+    background: url("chandelier-sm.jpg") center 40% / cover no-repeat;
+  }
+  @media (min-width: 900px) { .marquee-band::before { background-image: url("chandelier.jpg"); } }
+  .marquee-band::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background:
+      radial-gradient(ellipse at 50% 42%, rgba(24,18,30,.18) 0%, rgba(24,18,30,.38) 55%, rgba(20,16,26,.72) 100%),
+      linear-gradient(to bottom, rgba(20,16,26,.05) 0%, rgba(20,16,26,.12) 72%, var(--night) 100%);
+  }
+  .hero-note {
+    max-width: 760px; margin: clamp(1rem, 3vw, 1.6rem) auto 0; text-align: center; text-wrap: balance;
+    color: #F3ECD9; font-size: 1.02rem; letter-spacing: .01em; text-shadow: 0 1px 3px rgba(0,0,0,.9), 0 0 18px rgba(0,0,0,.8);
+  }
   .frame {
     max-width: 760px; margin: 0 auto; padding: 22px; border-radius: 12px;
     background-color: var(--frame);
     background-image: radial-gradient(circle, #FFF1C9 0 2px, #FFC14D 3px 4.5px, rgba(255,193,77,.28) 5.5px, transparent 8.5px);
     background-size: 22px 22px; background-origin: border-box; background-repeat: round;
-    box-shadow: 0 18px 50px rgba(0,0,0,.35);
+    box-shadow: 0 24px 70px rgba(0,0,0,.55), 0 0 60px rgba(255,193,77,.12);
   }
   .board {
-    background-color: var(--felt);
+    background-color: rgba(23, 22, 29, .86);
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
     background-image: repeating-linear-gradient(to bottom, rgba(255,255,255,.045) 0 1px, transparent 1px 13px);
     border-radius: 4px; padding: clamp(1.1rem, 4vw, 2.25rem) clamp(.75rem, 3vw, 2rem);
     text-align: center; color: #F6F3EA; font-family: var(--display); font-weight: 800; line-height: 1;
@@ -234,6 +254,7 @@
       <span class="line l3">JAN 6–9 LAS VEGAS</span>
     </div>
   </div>
+  <p class="hero-note">The ad tech parties, breakfasts and happy hours of CES week, in one list. The night still ends at the Chandelier.</p>
 </header>
 
 <main>

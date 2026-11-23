@@ -218,6 +218,7 @@
   .gate .lead { margin: 0 0 1.2rem; color: var(--muted); }
   .field { margin: 0 0 1rem; }
   .field label { display: block; font-weight: 700; margin-bottom: .35rem; }
+  .field label .opt { font-weight: 400; color: var(--faint); }
   .field input[type=email], .field input[type=text], .search input {
     width: 100%; min-height: 52px; padding: .7rem 1rem;
     border: 1.5px solid var(--line-hi); border-radius: 12px;
@@ -375,14 +376,26 @@
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Save the ones you want and build your CES plan</span></li>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>New events added daily as invites go out</span></li>
         </ul>
-        <p class="free">Free. One email, one code, and you're in on this device.</p>
+        <p class="free">Free. A few details, one code, and you're in on this device.</p>
       </div>
 
       <div class="gate" id="gate">
         <!-- Step 1: email -->
         <form id="step-email" novalidate>
           <h3 id="gate-title">Unlock the full list</h3>
-          <p class="lead">Enter your email and we'll send you a 6-digit code.</p>
+          <p class="lead">Tell us who you are and we'll email you a 6-digit code.</p>
+          <div class="field">
+            <label for="fullname">Your name</label>
+            <input id="fullname" name="name" type="text" autocomplete="name" maxlength="80" required aria-describedby="email-msg">
+          </div>
+          <div class="field">
+            <label for="company">Company</label>
+            <input id="company" name="organization" type="text" autocomplete="organization" maxlength="80" required aria-describedby="email-msg">
+          </div>
+          <div class="field">
+            <label for="jobtitle">Job title <span class="opt">(optional)</span></label>
+            <input id="jobtitle" name="title" type="text" autocomplete="organization-title" maxlength="80">
+          </div>
           <div class="field">
             <label for="email">Your email</label>
             <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required aria-describedby="email-msg">
@@ -398,7 +411,7 @@
           </label>
           <p class="msg" id="email-msg" role="alert"></p>
           <button class="btn gold big" id="send-btn" type="submit">Email me a code</button>
-          <p class="fine">We never sell or share your email. <a href="#privacy" id="privacy-link">How we use it</a></p>
+          <p class="fine">We never sell or share your details. <a href="#privacy" id="privacy-link">How we use them</a></p>
         </form>
 
         <!-- Step 2: code -->
@@ -468,8 +481,8 @@
     <p>The Adtech at CES group admins keep this list up to date. It's independent and volunteer-run, and not affiliated with CES or the Consumer Technology Association.</p>
     <p>Details change. Confirm times, venues and access with each host before you go.</p>
     <details id="privacy">
-      <summary>How we use your email</summary>
-      <p>We keep your email address, when you signed in and the consent you gave. We use it to give you access to this list and to send occasional marketing emails from Adtech at CES and Media Consulting Group (MCG), such as event updates, reports and offers. We never sell it or share it with anyone else. Every marketing email has an unsubscribe link, or write to <a class="contact-link" href="#"></a> and we'll delete it.</p>
+      <summary>How we use your details</summary>
+      <p>We keep your name, company, job title if you gave one, email address, when you signed in and the consent you gave. We use it to give you access to this list and to send occasional marketing emails from Adtech at CES and Media Consulting Group (MCG), such as event updates, reports and offers. We never sell it or share it with anyone else. Every marketing email has an unsubscribe link, or write to <a class="contact-link" href="#"></a> and we'll delete it.</p>
     </details>
   </footer>
 </main>
@@ -593,6 +606,8 @@ const MESSAGES = {
   disposable: () => "Temporary email addresses can't be used here. Use your work or personal email.",
   no_mail_server: (ctx) => `We couldn't find a mail server for ${ctx.domain || "that domain"}. Check the spelling.`,
   consent_required: () => "Tick the box to agree, then we'll send your code.",
+  name_required: () => "Add your name so we know who's joining.",
+  company_required: () => "Add your company, then we'll send your code.",
   cooldown: () => "We just sent you a code. You can ask for another one in a minute.",
   too_many: () => "Too many codes were requested for this email today. Try again tomorrow.",
   daily_limit: () => `We've hit today's limit for sign-in emails. Try again tomorrow, or write to ${CONFIG.contactEmail} and we'll add you.`,
@@ -607,6 +622,7 @@ const say = (el, text, kind = "err") => { el.textContent = text || ""; el.classN
 /* ---------------- state ---------------- */
 let savedInit = [];
 try { savedInit = JSON.parse(store.get("acs_saved") || "[]"); if (!Array.isArray(savedInit)) savedInit = []; } catch { savedInit = []; }
+const tidy = (v) => String(v || "").replace(/\s+/g, " ").trim().slice(0, 80);
 const state = {
   events: [], email: "", resendAt: 0,
   day: "all", cats: new Set(), q: "", savedOnly: false,
@@ -684,11 +700,16 @@ $("#step-email").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msg = $("#email-msg");
   const email = $("#email").value.trim().toLowerCase();
+  const who = { name: tidy($("#fullname").value), company: tidy($("#company").value), title: tidy($("#jobtitle").value) };
+  ["#fullname", "#company"].forEach((id) => $(id).removeAttribute("aria-invalid"));
+  if (!who.name) { $("#fullname").setAttribute("aria-invalid", "true"); say(msg, MESSAGES.name_required()); $("#fullname").focus(); return; }
+  if (!who.company) { $("#company").setAttribute("aria-invalid", "true"); say(msg, MESSAGES.company_required()); $("#company").focus(); return; }
   if (!EMAIL_RE.test(email)) { $("#email").setAttribute("aria-invalid", "true"); say(msg, MESSAGES.invalid_email()); $("#email").focus(); return; }
   if (!$("#consent").checked) { say(msg, MESSAGES.consent_required()); $("#consent").focus(); return; }
   const btn = $("#send-btn");
   btn.disabled = true; btn.textContent = "Sending…"; say(msg, "");
-  const res = await api({ action: "request", email, consent: true, hp: $("#website").value, source: sourceTag() });
+  state.who = who;
+  const res = await api({ action: "request", email, consent: true, hp: $("#website").value, source: sourceTag(), ...who });
   btn.disabled = false; btn.textContent = "Email me a code";
   if (!res.ok && res.error !== "cooldown") {
     if (["invalid_email", "disposable", "no_mail_server"].includes(res.error)) $("#email").setAttribute("aria-invalid", "true");
@@ -720,7 +741,7 @@ $("#step-code").addEventListener("submit", async (e) => {
   const btn = $("#verify-btn");
   if (btn.disabled) return;
   btn.disabled = true; btn.textContent = "Checking…";
-  const res = await api({ action: "verify", email: state.email, code, source: sourceTag() });
+  const res = await api({ action: "verify", email: state.email, code, source: sourceTag(), ...(state.who || {}) });
   btn.disabled = false; btn.textContent = "Show the events";
   if (!res.ok) { say(msg, (MESSAGES[res.error] || MESSAGES.server)(res)); $("#code").select(); return; }
   store.set("acs_token", res.token);
@@ -731,7 +752,7 @@ $("#step-code").addEventListener("submit", async (e) => {
 $("#resend-btn").addEventListener("click", async () => {
   const btn = $("#resend-btn");
   btn.disabled = true;
-  const res = await api({ action: "request", email: state.email, consent: true, source: sourceTag() });
+  const res = await api({ action: "request", email: state.email, consent: true, source: sourceTag(), ...(state.who || {}) });
   if (res.ok) { state.resendAt = Date.now() + (res.cooldown || 60) * 1000; say($("#code-msg"), "New code sent. Use the latest email.", "ok"); }
   else { say($("#code-msg"), (MESSAGES[res.error] || MESSAGES.server)(res)); state.resendAt = Date.now() + 60000; }
   tickResend();
@@ -962,7 +983,8 @@ $("#signout-btn").addEventListener("click", () => {
   store.del("acs_token"); store.del("acs_email");
   $("#unlocked").hidden = true; $("#locked").hidden = false;
   showStep("email"); $("#email").value = ""; $("#consent").checked = false;
-  $("#email").focus();
+  ["#fullname", "#company", "#jobtitle"].forEach((id) => { $(id).value = ""; });
+  $("#fullname").focus();
 });
 
 /* ---------------- letterboard ---------------- */
